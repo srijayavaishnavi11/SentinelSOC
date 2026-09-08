@@ -1,0 +1,157 @@
+* {
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+.dashboard{
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.dashboard-header{
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1{
+  margin: 0;
+  font-size: 32px;
+}
+
+.dashboard-header p{
+  margin-top: 6px;
+  color: #94a3b8;
+}
+
+.stats-grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat-card{
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+}
+
+.stat-card-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color:#94a3b8;
+  font-size: 14px;
+}
+
+.stat-card-value{
+  margin-top: 18px;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.severity-section{
+  margin-top: 32px;
+  background: #1e293b;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+}
+
+.severity-section h2{
+  margin-top: 0;
+}
+
+.severity-list{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.severity-list p{
+  margin: 0;
+  padding: 16px;
+  background: #0f172a;
+  border-radius: 8px;
+}
+
+.alert-section{
+  margin-top: 32px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.alert-section h2 {
+    margin-top: 0;
+}
+
+.alert-table-container {
+    overflow-x: auto;
+}
+
+.alert-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.alert-table th,
+.alert-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #334155;
+}
+
+.alert-table th {
+    color: #94a3b8;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.alert-table td {
+    font-size: 14px;
+}
+
+.severity-badge,
+.status-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.severity-badge.critical {
+    background: #7f1d1d;
+}
+
+.severity-badge.high {
+    background: #9a3412;
+}
+
+.severity-badge.medium {
+    background: #854d0e;
+}
+
+.severity-badge.low {
+    background: #166534;
+}
+
+.status-badge.open {
+    background: #991b1b;
+}
+
+.status-badge.investigating {
+    background: #92400e;
+}
+
+.status-badge.resolved {
+    background: #166534;
+}
