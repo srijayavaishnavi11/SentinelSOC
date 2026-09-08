@@ -100,11 +100,14 @@ SentinelSOC/
 ```
 
 ## API Endpoints
-- POST -> /events - Submit a security event
-- GET -> /events - Retrieve security events
-- GET -> /alerts - Retrieve security alerts
-- PATCH -> /alerts/{alert_id} - Update alert status
-- GET -> /dashboard/stats - Retrieve dashboard statistics
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/events` | Submit a security event |
+| GET | `/events` | Retrieve security events |
+| GET | `/alerts` | Retrieve security alerts |
+| PATCH | `/alerts/{alert_id}` | Update alert status |
+| GET | `/dashboard/stats` | Retrieve dashboard statistics |
 
 ## API Documentation
 FastAPI Swagger documentation:
