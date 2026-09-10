@@ -17,3 +17,18 @@ export async function getAlerts(){
     }
     return response.json();
 }
+export async function updateAlertStatus(
+    alertId: number,
+    status: string
+){
+    const response=await fetch(
+        `${API_URL}/alerts/${alertId}?status=${status}`,
+        {
+            method:"PATCH",
+        }
+    );
+    if(!response.ok){
+        throw new Error("Failed to update alert status");
+    }
+    return response.json();
+}

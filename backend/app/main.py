@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from .database import engine, SessionLocal
@@ -19,6 +20,34 @@ app = FastAPI(
     description="Real-Time Security Operations Center Platform",
     version="1.0.0"
 )
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket]=[]
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            await connection.send_json(message)
+manager=ConnectionManager()
+
+@app.websocket("/ws/alerts")
+async def websocket_alerts(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -26,13 +55,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.get("/")
 def home():
@@ -48,7 +70,7 @@ def health_check():
     }
 
 @app.post("/events")
-def create_security_event(
+async def create_security_event(
     event: SecurityEventCreate,
     db: Session = Depends(get_db)
 ):
@@ -107,6 +129,17 @@ def create_security_event(
         db.add(new_alert)
         db.commit()
         db.refresh(new_alert)
+        await manager.broadcast({
+            "id": new_alert.id,
+            "threat_type": new_alert.threat_type,
+            "severity": new_alert.severity,
+            "risk_score": new_alert.risk_score,
+            "source_ip": new_alert.source_ip,
+            "username": new_alert.username,
+            "message": new_alert.message,
+            "status": new_alert.status,
+            "created_at": new_alert.created_at.isoformat()
+        })
 
         return {
         "message": "Security event stored and threat detected",
@@ -134,6 +167,17 @@ def create_security_event(
         db.add(new_alert)
         db.commit()
         db.refresh(new_alert)
+        await manager.broadcast({
+                    "id": new_alert.id,
+                    "threat_type": new_alert.threat_type,
+                    "severity": new_alert.severity,
+                    "risk_score": new_alert.risk_score,
+                    "source_ip": new_alert.source_ip,
+                    "username": new_alert.username,
+                    "message": new_alert.message,
+                    "status": new_alert.status,
+                    "created_at": new_alert.created_at.isoformat()
+                })
 
         return {
             "message": "Security event stored and SQL injection detected",
@@ -161,6 +205,17 @@ def create_security_event(
         db.add(new_alert)
         db.commit()
         db.refresh(new_alert)
+        await manager.broadcast({
+                    "id": new_alert.id,
+                    "threat_type": new_alert.threat_type,
+                    "severity": new_alert.severity,
+                    "risk_score": new_alert.risk_score,
+                    "source_ip": new_alert.source_ip,
+                    "username": new_alert.username,
+                    "message": new_alert.message,
+                    "status": new_alert.status,
+                    "created_at": new_alert.created_at.isoformat()
+                })
 
         return {
             "message": "Security event stored and XSS detected",
@@ -191,6 +246,17 @@ def create_security_event(
         db.add(new_alert)
         db.commit()
         db.refresh(new_alert)
+        await manager.broadcast({
+                    "id": new_alert.id,
+                    "threat_type": new_alert.threat_type,
+                    "severity": new_alert.severity,
+                    "risk_score": new_alert.risk_score,
+                    "source_ip": new_alert.source_ip,
+                    "username": new_alert.username,
+                    "message": new_alert.message,
+                    "status": new_alert.status,
+                    "created_at": new_alert.created_at.isoformat()
+                })
 
         return {
             "message": "Security event stored and Port Scan detected",
@@ -263,6 +329,10 @@ def get_dashboard_stats(
     high_alerts=db.query(Alert).filter(Alert.severity=="HIGH").count()
     medium_alerts=db.query(Alert).filter(Alert.severity=="MEDIUM").count()
     low_alerts=db.query(Alert).filter(Alert.severity=="LOW").count()
+    threat_type_counts=db.query(
+        Alert.threat_type,
+        func.count(Alert.id)
+    ).group_by(Alert.threat_type).all()
     return{
         "total_events": total_events,
         "total_alerts": total_alerts,
@@ -276,5 +346,9 @@ def get_dashboard_stats(
             "high": high_alerts,
             "medium": medium_alerts,
             "low": low_alerts
+        },
+        "alerts_by_threat_type":{
+            threat_type: count
+            for threat_type, count in threat_type_counts
         }
     }
