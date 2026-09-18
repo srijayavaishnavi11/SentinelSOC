@@ -1,3 +1,9 @@
+from .detection.rules import (
+    THREAT_BRUTE_FORCE,
+    THREAT_SQL_INJECTION,
+    THREAT_XSS,
+    THREAT_PORT_SCAN
+)
 def calculate_risk_score(
     threat_type: str,
     attempts: int=1,
@@ -5,15 +11,15 @@ def calculate_risk_score(
 ):
     score = 0
     threat_scores = {
-        "Brute Force Attack": 20,
-        "SQL Injection": 60,
-        "XSS Attack": 50,
-        "Port Scan": 50
+        THREAT_BRUTE_FORCE: 20,
+        THREAT_SQL_INJECTION: 60,
+        THREAT_XSS: 50,
+        THREAT_PORT_SCAN: 50
     }
 
     score+= threat_scores.get(threat_type, 10)
 
-    if threat_type == "Brute Force Attack":
+    if threat_type == THREAT_BRUTE_FORCE:
         if attempts >= 20:
             score += 60
         elif attempts >= 10:

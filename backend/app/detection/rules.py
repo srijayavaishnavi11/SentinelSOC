@@ -1,5 +1,10 @@
 from datetime import datetime, timedelta
-from backend.app.models import SecurityEvent
+from ..models import SecurityEvent
+
+THREAT_BRUTE_FORCE="Brute Force Attack"
+THREAT_SQL_INJECTION="SQL Injection"
+THREAT_XSS="Cross-Site Scripting (XSS)"
+THREAT_PORT_SCAN="Port Scan"
 
 def detect_brute_force(
         db,
@@ -21,8 +26,8 @@ def detect_brute_force(
     if failed_attempts>=5:
         return {
             "detected": True,
-            "threat_type": "Brute Force Attack",
-            "severity": "High",
+            "threat_type": THREAT_BRUTE_FORCE,
+            "severity": "MEDIUM",
             "attempts": failed_attempts,
             "source_ip": source_ip,
             "username": username,
@@ -39,8 +44,16 @@ def detect_sql_injection(message:str):
     '''Rule:
      Detects SQL injection attempts based on common SQL keywords in the message.'''
     sql_patterns = [
-        "UNION SELECT", "INSERT INTO", "UPDATE", "DELETE FROM", "DROP TABLE",
-        "' OR 1=1", "--", ";--","/*","*/","xp_cmdshell", "' OR '1'='1"]
+        "' OR '1'='1",
+    "' OR 1=1",
+    '" OR "1"="1',
+    '" OR 1=1',
+    "UNION SELECT",
+    "DROP TABLE",
+    "INSERT INTO",
+    "DELETE FROM",
+    "UPDATE ",
+    "xp_cmdshell",]
     message_lower = message.lower()
     matched_patterns = []
     for pattern in sql_patterns:
@@ -49,8 +62,8 @@ def detect_sql_injection(message:str):
     if matched_patterns:
         return {
             "detected": True,
-            "threat_type": "SQL Injection",
-            "severity": "High",
+            "threat_type": THREAT_SQL_INJECTION,
+            "severity": "HIGH",
             "matched_patterns": matched_patterns,
             "message": (
                 f"Possible SQL injection attempt detected: "
@@ -76,8 +89,8 @@ def detect_xss(message:str):
     if matched_patterns:
         return {
             "detected": True,
-            "threat_type": "Cross-Site Scripting (XSS)",
-            "severity": "High",
+            "threat_type": THREAT_XSS,
+            "severity": "MEDIUM",
             "matched_patterns": matched_patterns,
             "message": (
                 f"Possible XSS attempt detected: "
@@ -108,8 +121,8 @@ def detect_port_scan(
     if len(unique_ports)>=10:
         return {
             "detected": True,
-            "threat_type": "Port Scan",
-            "severity": "High",
+            "threat_type": THREAT_PORT_SCAN,
+            "severity": "MEDIUM",
             "unique_ports": len(unique_ports),
             "source_ip": source_ip,
             "message": (
